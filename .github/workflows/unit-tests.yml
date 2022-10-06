@@ -1,0 +1,65 @@
+name: Run unit tests
+
+on:
+  workflow_call
+
+jobs:
+  # build on cpu hosts and upload to GHA
+  test:
+    strategy:
+      matrix:
+        os: [["linux", "ubuntu-18.04"], ["mac", "macos-latest"]]
+        python_version: [ "3.7", "3.8", "3.9", "3.10" ]
+
+    runs-on: ${{ matrix.os[1] }}
+
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python_version }}
+          architecture: x64
+
+      - name: Checkout torchrl
+        uses: actions/checkout@v2
+
+      - name: Upgrade pip
+        run: |
+          python3 -mpip install --upgrade pip
+
+      - name: Install PyTorch Nightly
+        run: |
+          python3 -mpip install pytorch torchvision cpuonly -c pytorch-nightly
+          python3 -mpip install functorch
+
+      - name: Install optional dependencies
+        run: |
+          python3 -mpip install tqdm tensorboard "hydra-core>=1.1" hydra-submitit-launcher
+          python3 -mpip install moviepy
+          python3 -mpip install dm_control
+          python3 -mpip install 'gym[atari]' "gym[accept-rom-license]" pygame
+          python3 -mpip install pytest pyyaml pytest-instafail
+          python3 -mpip install tensorboard
+          python3 -mpip install wandb
+
+
+      - name: Install torchrl
+        run: |
+          python3 setup.py develop
+
+      - name: Log version string
+        run: |
+          # Avoid ambiguity of "import torchrl" by deleting the source files.
+          rm -rf torchrl/
+          python -c "import torchrl; print(torchrl.__version__)"
+
+      - name: Run tests
+        run: |
+          set -e
+          export IN_CI=1
+          mkdir test-reports
+          python -m torch.utils.collect_env
+          python -c "import torchrl; print(torchrl.__version__)"
+          EXIT_STATUS=0
+          pytest test/smoke_test.py -v --durations 20
+          exit $EXIT_STATUS
