@@ -16,32 +16,33 @@ jobs:
 
     steps:
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python_version }}
           architecture: x64
+          cache: 'pip'
 
       - name: Checkout torchrl
         uses: actions/checkout@v2
 
       - name: Upgrade pip
         run: |
-          python3 -mpip install --upgrade pip
+          pip install --upgrade pip
 
       - name: Install PyTorch Nightly
         run: |
-          python3 -mpip install pytorch torchvision cpuonly -c pytorch-nightly
-          python3 -mpip install functorch
+          pip install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
+          pip install functorch
 
       - name: Install optional dependencies
         run: |
-          python3 -mpip install tqdm tensorboard "hydra-core>=1.1" hydra-submitit-launcher
-          python3 -mpip install moviepy
-          python3 -mpip install dm_control
-          python3 -mpip install 'gym[atari]' "gym[accept-rom-license]" pygame
-          python3 -mpip install pytest pyyaml pytest-instafail
-          python3 -mpip install tensorboard
-          python3 -mpip install wandb
+          pip install tqdm tensorboard "hydra-core>=1.1" hydra-submitit-launcher
+          pip install moviepy
+          pip install dm_control
+          pip install 'gym[atari]' "gym[accept-rom-license]" pygame
+          pip install pytest pyyaml pytest-instafail
+          pip install tensorboard
+          pip install wandb
 
       - name: Install torchrl
         run: |
