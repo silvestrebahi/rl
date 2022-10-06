@@ -42,7 +42,6 @@ jobs:
           python3 -mpip install tensorboard
           python3 -mpip install wandb
 
-
       - name: Install torchrl
         run: |
           python3 setup.py develop
