@@ -55,11 +55,9 @@ jobs:
 
       - name: Run tests
         run: |
-          set -e
-          export IN_CI=1
-          mkdir test-reports
-          python -m torch.utils.collect_env
-          python -c "import torchrl; print(torchrl.__version__)"
-          EXIT_STATUS=0
           pytest test/smoke_test.py -v --durations 20
-          exit $EXIT_STATUS
+          pytest test/smoke_test_deps.py -v --durations 20
+          pytest --instafail -v --durations 20
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
