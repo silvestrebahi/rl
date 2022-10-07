@@ -5,8 +5,8 @@ on:
   - push
 
 jobs:
-  # build on cpu hosts and upload to GHA
-  test:
+
+  test_on_cpu:
     strategy:
       matrix:
         os: [["linux", "ubuntu-18.04"], ["mac", "macos-latest"]]
@@ -33,7 +33,7 @@ jobs:
           pip install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
           pip install functorch
 
-      - name: Install all dependencies
+      - name: Install project dependencies
         run: |
           pip install tqdm tensorboard "hydra-core>=1.1" hydra-submitit-launcher
           pip install moviepy
@@ -48,6 +48,11 @@ jobs:
       - name: Install torchrl
         run: |
           python setup.py install
+
+      - name: Install test dependencies
+        run: |
+          pip install numpy pytest pytest-cov codecov pytest-instafail
+          pip install unittest-xml-reporting pillow>=4.1.1 scipy av networkx expecttest pyyaml
 
       - name: Log version string
         run: |
